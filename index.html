@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Morse Code System</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    textarea {
+      width: 90%;
+      height: 100px;
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background: #22c55e;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #16a34a;
+    }
+    h2 {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Morse Code System</h1>
+
+  <h2>Input</h2>
+  <textarea id="input" placeholder="Enter text or Morse code"></textarea>
+
+  <div>
+    <button onclick="textToMorse()">Text ➝ Morse</button>
+    <button onclick="morseToText()">Morse ➝ Text</button>
+    <button onclick="playMorse()">Play Sound</button>
+  </div>
+
+  <h2>Output</h2>
+  <textarea id="output" readonly></textarea>
+
+<script>
+const morseCode = {
+  'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..',
+  'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+  'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+  'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+  'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+  'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+  'Y': '-.--', 'Z': '--..',
+  '1': '.----', '2': '..---', '3': '...--',
+  '4': '....-', '5': '.....', '6': '-....',
+  '7': '--...', '8': '---..', '9': '----.',
+  '0': '-----',
+  ' ': '/'
+};
+
+// Reverse map
+const reverseMorse = {};
+for (let key in morseCode) {
+  reverseMorse[morseCode[key]] = key;
+}
+
+// TEXT ➝ MORSE
+function textToMorse() {
+  let input = document.getElementById("input").value.toUpperCase();
+  let result = "";
+
+  for (let char of input) {
+    result += (morseCode[char] || '') + ' ';
+  }
+
+  document.getElementById("output").value = result.trim();
+}
+
+// MORSE ➝ TEXT
+function morseToText() {
+  let input = document.getElementById("input").value.trim();
+  let words = input.split(' ');
+  let result = "";
+
+  for (let code of words) {
+    if (code === "/") {
+      result += " ";
+    } else {
+      result += reverseMorse[code] || '';
+    }
+  }
+
+  document.getElementById("output").value = result;
+}
+
+// AUDIO (BEEP SOUND)
+function playMorse() {
+  let morse = document.getElementById("output").value;
+  let context = new (window.AudioContext || window.webkitAudioContext)();
+
+  let time = context.currentTime;
+
+  for (let char of morse) {
+    if (char === '.') {
+      beep(context, time, 0.1);
+      time += 0.2;
+    } else if (char === '-') {
+      beep(context, time, 0.3);
+      time += 0.4;
+    } else {
+      time += 0.2;
+    }
+  }
+}
+
+function beep(context, time, duration) {
+  let oscillator = context.createOscillator();
+  let gain = context.createGain();
+
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+
+  oscillator.frequency.value = 600;
+  oscillator.start(time);
+  oscillator.stop(time + duration);
+}
+</script>
+
+</body>
+</html>
